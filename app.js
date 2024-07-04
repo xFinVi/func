@@ -3,9 +3,12 @@ const axios = require('axios');
 const sharp = require('sharp');
 
 const app = express();
+const port = process.env.PORT || 3000;
 
+// Middleware to parse JSON bodies
 app.use(express.json());
 
+// Documentation for generateThumbnail function
 const docs = {
   "name": "generateThumbnail",
   "description": "Generate a thumbnail from an image URL",
@@ -30,7 +33,8 @@ const docs = {
   }
 };
 
-app.post('/generateThumbnail', async (req, res) => {
+// Function to generate a thumbnail from an image URL
+export const generateThumbnail = async (req, res) => {
   try {
     const { imageUrl } = req.body;
 
@@ -46,18 +50,23 @@ app.post('/generateThumbnail', async (req, res) => {
     const base64Thumbnail = thumbnailBuffer.toString('base64');
 
     // Respond with the base64-encoded thumbnail
-    res.json({ thumbnail: base64Thumbnail });
+    res.send({ thumbnail: base64Thumbnail });
   } catch (error) {
     console.error('Error generating thumbnail:', error);
-    res.status(500).json({ error: 'Failed to generate thumbnail' });
+    res.status(500).send({ error: 'Failed to generate thumbnail' });
   }
-});
+};
 
-app.get('/generateThumbnailDocs', (req, res) => {
+// Endpoint to provide documentation for generateThumbnail function
+export const generateThumbnailDocs = (req, res) => {
   res.json(docs);
-});
+};
 
-const port = process.env.PORT || 3000;
+// Define routes
+app.post('/generateThumbnail', generateThumbnail);
+app.get('/generateThumbnailDocs', generateThumbnailDocs);
+
+// Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
