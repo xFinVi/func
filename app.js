@@ -6,6 +6,30 @@ const app = express();
 
 app.use(express.json());
 
+const docs = {
+  "name": "generateThumbnail",
+  "description": "Generate a thumbnail from an image URL",
+  "input": {
+    "type": "object",
+    "properties": {
+      "imageUrl": {
+        "type": "string",
+        "description": "URL of the image to generate thumbnail from"
+      }
+    },
+    "required": ["imageUrl"]
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "thumbnail": {
+        "type": "string",
+        "description": "Base64-encoded thumbnail image"
+      }
+    }
+  }
+};
+
 app.post('/generateThumbnail', async (req, res) => {
   try {
     const { imageUrl } = req.body;
@@ -30,30 +54,6 @@ app.post('/generateThumbnail', async (req, res) => {
 });
 
 app.get('/generateThumbnailDocs', (req, res) => {
-  const docs = {
-    "name": "generateThumbnail",
-    "description": "Generate a thumbnail from an image URL",
-    "input": {
-      "type": "object",
-      "properties": {
-        "imageUrl": {
-          "type": "string",
-          "description": "URL of the image to generate thumbnail from"
-        }
-      },
-      "required": ["imageUrl"]
-    },
-    "output": {
-      "type": "object",
-      "properties": {
-        "thumbnail": {
-          "type": "string",
-          "description": "Base64-encoded thumbnail image"
-        }
-      }
-    }
-  };
-
   res.json(docs);
 });
 
