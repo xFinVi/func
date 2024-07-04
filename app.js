@@ -1,36 +1,38 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const axios = require('axios');
 
 const app = express();
 
 const docs = {
-  "name": "capitalizeString",
-  "description": "Capitalize all letters in a given string",
+  "name": "generateJoke",
+  "description": "Generate a random joke",
   "input": {
-    "type": "string",
-    "description": "Input the string you'd like to capitalize",
-    "example": "hello, world"
+    "type": "none",
+    "description": "No input required",
   },
   "output": {
-    "type": "string",
-    "description": "String with all letters capitalized",
-    "example": "HELLO, WORLD"
+    "type": "object",
+    "description": "A random joke",
+    "example": {
+      "setup": "Why don't scientists trust atoms?",
+      "punchline": "Because they make up everything!"
+    }
   }
 };
 
-app.use(bodyParser.json());
+app.use(express.json());
 
-app.post('/capitalizeString', (req, res) => {
-  const { input } = req.body;
-  if (typeof input !== 'string') {
-    return res.status(400).json({ error: 'Input must be a string' });
+app.get('/generateJoke', async (req, res) => {
+  try {
+    const response = await axios.get('https://official-joke-api.appspot.com/random_joke');
+    const joke = response.data;
+    res.json({ joke });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch joke' });
   }
-  
-  const output = input.toUpperCase(); // Capitalize all letters
-  res.json({ output });
 });
 
-app.get('/capitalizeString', (req, res) => {
+app.get('/generateJokeDocs', (req, res) => {
   res.json(docs);
 });
 
