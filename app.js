@@ -4,32 +4,33 @@ const bodyParser = require('body-parser');
 const app = express();
 
 const docs = {
-  "name": "reverseString",
-  "description": "Reverse any given string",
+  "name": "capitalizeString",
+  "description": "Capitalize all letters in a given string",
   "input": {
     "type": "string",
-    "description": "Input the string you'd like to reverse",
-    "example": "Hello, world"
+    "description": "Input the string you'd like to capitalize",
+    "example": "hello, world"
   },
   "output": {
     "type": "string",
-    "description": "Reversed string",
-    "example": "dlrow ,olleH"
+    "description": "String with all letters capitalized",
+    "example": "HELLO, WORLD"
   }
 };
 
 app.use(bodyParser.json());
 
-app.post('/reverseString', (req, res) => {
+app.post('/capitalizeString', (req, res) => {
   const { input } = req.body;
   if (typeof input !== 'string') {
     return res.status(400).json({ error: 'Input must be a string' });
   }
-  const output = input.split('').reverse().join('');
+  
+  const output = input.toUpperCase(); // Capitalize all letters
   res.json({ output });
 });
 
-app.get('/reverseString', (req, res) => {
+app.get('/capitalizeString', (req, res) => {
   res.json(docs);
 });
 
