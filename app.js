@@ -1,13 +1,12 @@
 const express = require('express');
 const axios = require('axios');
 const sharp = require('sharp');
-
+// Middleware to parse JSON bodies
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-
 // Documentation for generateThumbnail function
 const docs = {
   "name": "generateThumbnail",
@@ -34,7 +33,7 @@ const docs = {
 };
 
 // Function to generate a thumbnail from an image URL
-export const generateThumbnail = async (req, res) => {
+const generateThumbnail = async (req, res) => {
   try {
     const { imageUrl } = req.body;
 
@@ -58,7 +57,7 @@ export const generateThumbnail = async (req, res) => {
 };
 
 // Endpoint to provide documentation for generateThumbnail function
-export const generateThumbnailDocs = (req, res) => {
+const generateThumbnailDocs = (req, res) => {
   res.json(docs);
 };
 
