@@ -14,12 +14,12 @@ const docs = {
   description: "Generate a thumbnail from an image URL",
   input: {
     type: "string",
-    description: "URL of the image to generate thumbnail from",
+    description: "URL of the image to generate thumbnail from"
   },
   output: {
     type: "string",
-    description: "Base64-encoded thumbnail image",
-  },
+    description: "Base64-encoded thumbnail image"
+  }
 };
 
 // Function to generate a thumbnail from an image URL
