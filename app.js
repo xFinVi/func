@@ -38,20 +38,21 @@ const generateThumbnail = async (req, res) => {
 
 // Define the documentation for generateThumbnail function
 const generateThumbnailDocs = (req, res) => {
-  const docs = {
-    "name": "generateThumbnail",
-    "description": "Generate a thumbnail from an image URL",
-    "input": {
-      "type": "object",
-      "description": "Object with an imageUrl property",
-      "example": { "imageUrl": "https://example.com/image.jpg" }
-    },
-    "output": {
-      "type": "object",
-      "description": "Resized image in 100x100 thumbnail form",
-      "example": "JPEG image data"
-    }
-  };
+const docs = {
+  name: "generateThumbnail",
+  description: "Generate a thumbnail from an image URL",
+  input: {
+    type: "string",
+    description: "String with an imageUrl property",
+    example: "https://example.com/image.jpg"
+  },
+  output: {
+    type: "string",
+    description: "Resized image in JPEG format",
+    example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQE..."
+  }
+};
+
   res.json(docs);
 };
 
