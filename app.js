@@ -11,15 +11,15 @@ app.use(express.json());
 // Function to generate a thumbnail from an image URL
 const generateThumbnail = async (req, res) => {
   try {
-    const { input } = req.body;
+    const imageUrl = req.body.input;
 
-    // Ensure input is a string URL
-    if (typeof input !== 'string') {
+    // Ensure imageUrl is a string
+    if (typeof imageUrl !== 'string') {
       return res.status(400).json({ error: 'Invalid input format. Expected string URL.' });
     }
 
     // Fetch the image from the provided URL
-    const imageResponse = await axios.get(input, { responseType: 'arraybuffer' });
+    const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
 
     // Resize the image to 100x100 pixels (adjust dimensions as needed)
     const resizedImageBuffer = await sharp(Buffer.from(imageResponse.data))
@@ -36,7 +36,6 @@ const generateThumbnail = async (req, res) => {
     res.status(500).json({ error: 'Failed to generate thumbnail' });
   }
 };
-
 // Define the documentation for generateThumbnail function
 const generateThumbnailDocs = (req, res) => {
   const docs = {
