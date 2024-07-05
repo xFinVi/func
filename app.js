@@ -21,7 +21,7 @@ const generateThumbnail = async (req, res) => {
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
 
     // Resize the image to 100x100 pixels (adjust dimensions as needed)
-    const thumbnailBuffer = await sharp(Buffer.from(imageResponse.data))
+    const resizedImageBuffer = await sharp(Buffer.from(imageResponse.data))
       .resize({ width: 100, height: 100 })
       .toBuffer();
 
@@ -29,7 +29,7 @@ const generateThumbnail = async (req, res) => {
     res.set('Content-Type', 'image/jpeg');
 
     // Send the resized image buffer in the response
-    res.send(thumbnailBuffer);
+    res.send(resizedImageBuffer);
   } catch (error) {
     console.error('Error generating thumbnail:', error);
     res.status(500).json({ error: 'Failed to generate thumbnail' });
@@ -38,21 +38,19 @@ const generateThumbnail = async (req, res) => {
 
 // Define the documentation for generateThumbnail function
 const generateThumbnailDocs = (req, res) => {
-const docs = {
-  name: "generateThumbnail",
-  description: "Generate a thumbnail from an image URL",
-  input: {
-    type: "string",
-    description: "String with an imageUrl property",
-    example: "https://example.com/image.jpg"
-  },
-  output: {
-    type: "string",
-    description: "Resized image in JPEG format",
-    example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQE..."
-  }
-};
-
+  const docs = {
+    name: "generateThumbnail",
+    description: "Generate a thumbnail from an image URL",
+    input: {
+      type: "object",
+      description: "Object with an imageUrl property",
+      example: { input: { imageUrl: "https://example.com/image.jpg" } }
+    },
+    output: {
+      type: "image/jpeg",
+      description: "Resized image in 100x100 thumbnail format"
+    }
+  };
   res.json(docs);
 };
 
