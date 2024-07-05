@@ -7,12 +7,16 @@ const port = process.env.PORT || 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-const defaultImage = "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=100&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 
 // Function to generate a thumbnail from an image URL
 const generateThumbnail = async (req, res) => {
   try {
     const { input } = req.body;
+
+    // Ensure input is a string URL
+    if (typeof input !== 'string') {
+      return res.status(400).json({ error: 'Invalid input format. Expected string URL.' });
+    }
 
     // Fetch the image from the provided URL
     const imageResponse = await axios.get(input, { responseType: 'arraybuffer' });
@@ -41,7 +45,7 @@ const generateThumbnailDocs = (req, res) => {
     input: {
       type: "object",
       properties: {
-        url: {
+        input: {
           type: "string",
           description: "URL of the image to generate a thumbnail from",
           example: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -50,12 +54,12 @@ const generateThumbnailDocs = (req, res) => {
     },
     output: {
       type: "string",
-      description: "HTML code that embeds the resized image in 100x100 thumbnail format",
-      example: "https://i.ibb.co/10VSDz0/Finance-Calculator.png"
+      description: "URL of the resized image in 100x100 thumbnail format",
+      example: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.png"
     }
   };
-  
-  res.send( docs);
+
+  res.json(docs);
 };
 
 // Define routes
