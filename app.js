@@ -1,22 +1,20 @@
-const express = require("express");
-const axios = require("axios");
-const sharp = require("sharp");
-// Middleware to parse JSON bodies
+const express = require('express');
+const axios = require('axios');
+const sharp = require('sharp');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
 // Documentation for generateThumbnail function
 const docs = {
   name: "generateThumbnail",
   description: "Generate a thumbnail from an image URL",
   input: {
-    input: {
-      type: "string",
-      description: "URL of the image to generate thumbnail from",
-    },
-    required: ["imageUrl"],
+    type: "string",
+    description: "URL of the image to generate thumbnail from",
   },
   output: {
     type: "string",
@@ -30,9 +28,7 @@ const generateThumbnail = async (req, res) => {
     const { input: imageUrl } = req.body;
 
     // Fetch the image from the provided URL
-    const imageResponse = await axios.get(imageUrl, {
-      responseType: "arraybuffer",
-    });
+    const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
 
     // Resize the image to 100x100 pixels (adjust dimensions as needed)
     const thumbnailBuffer = await sharp(Buffer.from(imageResponse.data))
@@ -40,13 +36,13 @@ const generateThumbnail = async (req, res) => {
       .toBuffer();
 
     // Convert the resized image buffer to base64
-    const base64Thumbnail = thumbnailBuffer.toString("base64");
+    const base64Thumbnail = thumbnailBuffer.toString('base64');
 
     // Respond with the base64-encoded thumbnail
     res.send({ thumbnail: base64Thumbnail });
   } catch (error) {
-    console.error("Error generating thumbnail:", error);
-    res.status(500).send({ error: "Failed to generate thumbnail" });
+    console.error('Error generating thumbnail:', error);
+    res.status(500).send({ error: 'Failed to generate thumbnail' });
   }
 };
 
@@ -56,8 +52,8 @@ const generateThumbnailDocs = (req, res) => {
 };
 
 // Define routes
-app.post("/generateThumbnail", generateThumbnail);
-app.get("/generateThumbnail", generateThumbnailDocs);
+app.post('/generateThumbnail', generateThumbnail);
+app.get('/generateThumbnail', generateThumbnailDocs);
 
 // Start the server
 app.listen(port, () => {
