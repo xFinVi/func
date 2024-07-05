@@ -1,31 +1,41 @@
 const express = require('express');
 const axios = require('axios');
 const sharp = require('sharp');
-
+// Middleware to parse JSON bodies
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-
 // Documentation for generateThumbnail function
 const docs = {
-  name: "generateThumbnail",
-  description: "Generate a thumbnail from an image URL",
-  input: {
-    type: "string",
-    description: "URL of the image to generate thumbnail from"
+  "name": "generateThumbnail",
+  "description": "Generate a thumbnail from an image URL",
+  "input": {
+    "type": "object",
+    "properties": {
+      "imageUrl": {
+        "type": "string",
+        "description": "URL of the image to generate thumbnail from"
+      }
+    },
+    "required": ["imageUrl"]
   },
-  output: {
-    type: "string",
-    description: "Base64-encoded thumbnail image"
+  "output": {
+    "type": "object",
+    "properties": {
+      "thumbnail": {
+        "type": "string",
+        "description": "Base64-encoded thumbnail image"
+      }
+    }
   }
 };
 
 // Function to generate a thumbnail from an image URL
 const generateThumbnail = async (req, res) => {
   try {
-    const { input: imageUrl } = req.body;
+    const { imageUrl } = req.body;
 
     // Fetch the image from the provided URL
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
