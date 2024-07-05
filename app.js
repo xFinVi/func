@@ -34,19 +34,25 @@ const generateThumbnail = async (req, res) => {
 
 // Define the documentation for generateThumbnail function
 const generateThumbnailDocs = (req, res) => {
-  const docs = {
+  const generateThumbnailDocs = {
     name: "generateThumbnail",
     description: "Generate a thumbnail from an image URL",
     input: {
-      type: "string",
-      description: "URL of the image to generate a thumbnail from",
-      example: { input: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"  }
+        type: "object",
+        properties: {
+            url: {
+                type: "string",
+                description: "URL of the image to generate a thumbnail from",
+                example: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            }
+        }
     },
     output: {
-      type: "image/jpeg",
-      description: "Resized image in 100x100 thumbnail format"
+        type: "string",
+        description: "URL of the resized image in 100x100 thumbnail format",
+        example: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=100&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     }
-  };
+};
   res.json(docs);
 };
 
