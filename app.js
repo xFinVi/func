@@ -63,7 +63,7 @@ const generateThumbnailDocs = (req, res) => {
 
 // Define routes
 app.post('/generateThumbnail', generateThumbnail);
-app.get('/generateThumbnailDocs', generateThumbnailDocs);
+app.get('/generateThumbnail', generateThumbnailDocs);
 
 // Start the server
 app.listen(port, () => {
