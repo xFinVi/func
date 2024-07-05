@@ -30,12 +30,29 @@ const generateThumbnail = async (req, res) => {
     res.set('Content-Type', 'image/jpeg');
 
     // Send the resized image buffer in the response
-    res.send(resizedImageBuffer);
+    res.write(resizedImageBuffer, 'binary');
+    res.end(null, 'binary');
+
+    // Construct the URL of the resized image
+    const resizedImageUrl = `${imageUrl}&w=100&auto=format&fit=crop`;
+
+    // Send the response with output containing the resized image URL
+    return {
+      id: 25529, // Replace with actual ID if applicable
+      functionId: 214, // Replace with actual function ID
+      userId: 55, // Replace with actual user ID
+      input: imageUrl,
+      output: resizedImageUrl,
+      timestamp: new Date().toISOString(),
+      paymentId: null
+    };
+
   } catch (error) {
     console.error('Error generating thumbnail:', error);
     res.status(500).json({ error: 'Failed to generate thumbnail' });
   }
 };
+
 // Define the documentation for generateThumbnail function
 const generateThumbnailDocs = (req, res) => {
   const docs = {
