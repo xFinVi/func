@@ -14,7 +14,8 @@ app.use(express.json());
 // Function to generate a thumbnail from an image URL
 const generateThumbnail = async (req, res) => {
   try {
-    const { imageUrl = defaultImageUrl } = req.body;
+    const { input } = req.body;
+    const { imageUrl = defaultImageUrl } = input;
 
     // Fetch the image from the provided URL
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
@@ -24,14 +25,14 @@ const generateThumbnail = async (req, res) => {
       .resize({ width: 100, height: 100 })
       .toBuffer();
 
-    // Set the response content type based on the image format (assuming JPEG for example)
+    // Set Content-Type header to indicate image/jpeg
     res.set('Content-Type', 'image/jpeg');
 
     // Send the resized image buffer in the response
     res.send(thumbnailBuffer);
   } catch (error) {
     console.error('Error generating thumbnail:', error);
-    res.status(500).send('Failed to generate thumbnail');
+    res.status(500).json({ error: 'Failed to generate thumbnail' });
   }
 };
 
@@ -41,14 +42,14 @@ const generateThumbnailDocs = (req, res) => {
     "name": "generateThumbnail",
     "description": "Generate a thumbnail from an image URL",
     "input": {
-      "type": "string",
-      "description": "URL of the image to generate thumbnail from",
-      "example": "https://example.com/image.jpg"
+      "type": "object",
+      "description": "Object with an imageUrl property",
+      "example": { "imageUrl": "https://example.com/image.jpg" }
     },
     "output": {
-      "type": "string",
-      "description": "Base64-encoded thumbnail image",
-      "example": "iVBORw0KGgoAAAANSUhEUgAA...",
+      "type": "object",
+      "description": "Resized image in 100x100 thumbnail form",
+      "example": "JPEG image data"
     }
   };
   res.json(docs);
