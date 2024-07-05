@@ -12,23 +12,13 @@ const docs = {
   "name": "generateThumbnail",
   "description": "Generate a thumbnail from an image URL",
   "input": {
-    "type": "object",
-    "properties": {
-      "imageUrl": {
-        "type": "string",
-        "description": "URL of the image to generate thumbnail from"
-      }
-    },
-    "required": ["imageUrl"]
+    "type": "string",        
+        "description": "URL of the image to generate thumbnail from",
   },
   "output": {
-    "type": "object",
-    "properties": {
-      "thumbnail": {
-        "type": "string",
-        "description": "Base64-encoded thumbnail image"
-      }
-    }
+    "type": "string",    
+        "description": "Base64-encoded thumbnail image",
+  
   }
 };
 
