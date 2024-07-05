@@ -34,7 +34,7 @@ const generateThumbnail = async (req, res) => {
 
 // Define the documentation for generateThumbnail function
 const generateThumbnailDocs = (req, res) => {
-  const generateThumbnailDocs = {
+  const docs = {
     name: "generateThumbnail",
     description: "Generate a thumbnail from an image URL",
     input: {
