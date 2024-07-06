@@ -1,76 +1,80 @@
 import express from 'express';
+import sharp from 'sharp';
 import axios from 'axios';
+import multer from 'multer';
 
 const app = express();
-const port = process.env.PORT || 3000;
+const upload = multer();
 
-app.use(express.json()); // Middleware to parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
+// Middleware to parse JSON bodies
+app.use(express.json());
+// Middleware to parse URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));
 
-const fetchAndEncodeImageBase64 = async (imageUrl) => {
+export const generateThumbnail = async (req, res) => {
+  const { input } = req.body; // Assuming input is the URL of the image
+
   try {
-    const response = await axios.get(imageUrl, {
+    // Validate the input URL
+    if (!input) {
+      return res.status(400).send({ error: 'Input URL is required.' });
+    }
+
+    // Fetch the image from the provided URL
+    const response = await axios({
+      url: input,
       responseType: 'arraybuffer'
     });
 
-    if (response.status !== 200) {
-      throw new Error(`Failed to fetch image from ${imageUrl}. Status code: ${response.status}`);
-    }
+    // Resize the image to 100x100 pixels using sharp
+    const resizedImage = await sharp(response.data)
+      .resize(100, 100)
+      .toBuffer();
 
-    // Convert image buffer to base64
-    const imageBuffer = Buffer.from(response.data, 'binary');
-    const base64Image = imageBuffer.toString('base64');
+    // Set the content type to image/jpeg or image/png based on the image type
+    const contentType = response.headers['content-type'];
+    res.set('Content-Type', contentType);
 
-    return base64Image;
+    // Send the resized image buffer as the response
+    res.send(resizedImage);
   } catch (error) {
-    throw new Error(`Failed to fetch and encode image: ${error.message}`);
+    console.error(error);
+    res.status(500).send({ error: 'An error occurred while processing the image.' });
   }
 };
 
-export const generateThumbnailBase64 = async (req, res) => {
-  try {
-    const { input } = req.body;
-
-    console.log('Received image URL:', input);
-
-    // Ensure imageUrl is provided and handle any necessary validations
-    if (!input || typeof input !== 'string') {
-      console.log('Invalid input format. Expected string URL.');
-      return res.status(400).json({ error: 'Invalid input format. Expected string URL.' });
-    }
-
-    // Call fetchAndEncodeImageBase64 to get the base64-encoded image
-    const base64Image = await fetchAndEncodeImageBase64(input);
-
-    // Send the base64-encoded image as JSON response
-    res.json({ output: base64Image });
-
-  } catch (error) {
-    console.error('Error generating base64 from image:', error);
-    res.status(500).json({ error: 'Failed to generate base64 from image' });
-  }
-};
-
-export const generateThumbnailDocs = (req, res) => {
+const getDocs = (req, res) => {
   res.json({
-    name: "generateThumbnailBase64", 
-    description: "Generate a base64-encoded string from an image URL.",
+    name: "generateThumbnail",
+    description: "Resize an image to 100x100 pixels and return it.",
     input: {
       type: "string",
-      description: "URL of the image to generate base64 from",
+      description: "URL of the image to be resized",
       example: "https://example.com/image.jpg"
     },
-    output: {      
+    output: {
+      type: "object",
+      description: "Resized image binary data",
+      properties: {
+        contentType: {
           type: "string",
-          description: "Base64-encoded image data",
-          example: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA...<base64_data>..."
-        }         
+          description: "MIME type of the resized image",
+          example: "image/jpeg"
+        },
+        data: {
+          type: "string",
+          description: "Binary data of the resized image",
+          example: "<binary image data>"
+        }
+      }
+    }
   });
 };
 
-app.post('/generateThumbnail', generateThumbnailBase64);
-app.get('/generateThumbnail', generateThumbnailDocs);
+app.post('/generateThumbnail', upload.none(), generateThumbnail);
+app.get('/generateThumbnail', getDocs);
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
