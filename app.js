@@ -7,6 +7,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Function to generate a thumbnail from an image URL
 const generateThumbnail = async (req, res) => {
@@ -55,7 +56,7 @@ const generateThumbnailDocs = (req, res) => {
     output: {
       type: "string",
       description: "URL of the resized image in 100x100 thumbnail format",
-      example: "https://example.com/resized-image.jpg"
+      example: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.png"
     }
   };
 
