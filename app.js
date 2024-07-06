@@ -50,18 +50,12 @@ const getDocs = (req, res) => {
     input: {
       type: "string",
       description: "URL of the image ",
-      example: "https://example.com/image.jpg"
+      example: "https://example.com/image"
     },
     output: {
-      type: "object",
-      description: "Resized image binary data",
-      properties: {
-        contentType: {
-          type: "string",
-          description: "MIME type of the resized image",
-          example: "image/jpeg"
-        }       
-      }
+      type: "image/jpeg", 
+      description: "Resized image",
+      example: "<binary image data>"
     }
   });
 };
