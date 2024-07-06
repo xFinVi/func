@@ -1,8 +1,5 @@
-const express = require('express');
-const axios = require('axios');
-const sharp = require('sharp');
-const multer = require('multer');
-const upload = multer(); // For parsing multipart/form-data
+import express from 'express';
+import axios from 'axios';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,65 +7,68 @@ const port = process.env.PORT || 3000;
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
 
-const fetchAndProcessImage = async (imageUrl) => {
+const fetchAndEncodeImageBase64 = async (imageUrl) => {
   try {
     const response = await axios.get(imageUrl, {
-      responseType: 'arraybuffer' // Ensure the response is treated as binary data
+      responseType: 'arraybuffer'
     });
 
-    // Process the image using sharp
-    const thumbnailBuffer = await sharp(Buffer.from(response.data))
-      .resize({ width: 100, height: 100 })
-      .toFormat('png')
-      .toBuffer();
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch image from ${imageUrl}. Status code: ${response.status}`);
+    }
 
-    return thumbnailBuffer;
+    // Convert image buffer to base64
+    const imageBuffer = Buffer.from(response.data, 'binary');
+    const base64Image = imageBuffer.toString('base64');
+
+    return base64Image;
   } catch (error) {
-    console.error('Error fetching or processing image:', error);
-    throw error;
+    throw new Error(`Failed to fetch and encode image: ${error.message}`);
   }
 };
 
-const generateThumbnail = async (req, res) => {
+export const generateThumbnailBase64 = async (req, res) => {
   try {
-    const input = req.body.input; // Assuming 'input' is the field name in the form-data
+    const { input } = req.body;
 
-    console.log('Received input:', input);
+    console.log('Received image URL:', input);
 
-    // Ensure input is a string and handle any necessary validations
-    if (typeof input !== 'string') {
+    // Ensure imageUrl is provided and handle any necessary validations
+    if (!input || typeof input !== 'string') {
       console.log('Invalid input format. Expected string URL.');
       return res.status(400).json({ error: 'Invalid input format. Expected string URL.' });
     }
 
-    // Call fetchAndProcessImage and send the processed image buffer as response
-    const thumbnailBuffer = await fetchAndProcessImage(input);
+    // Call fetchAndEncodeImageBase64 to get the base64-encoded image
+    const base64Image = await fetchAndEncodeImageBase64(input);
 
-   res.type('image/png').send(thumbnailBuffer);
- 
+    // Send the base64-encoded image as JSON response
+    res.json({ output: base64Image });
+
   } catch (error) {
-    console.error('Error generating thumbnail:', error);
-    res.status(500).json({ error: 'Failed to generate thumbnail' });
+    console.error('Error generating base64 from image:', error);
+    res.status(500).json({ error: 'Failed to generate base64 from image' });
   }
 };
 
-const generateThumbnailDocs = (req, res) => {
+export const generateThumbnailDocs = (req, res) => {
   res.json({
-    name: "generateThumbnail",
-    description: "Generate a thumbnail from an image URL",
+    name: "generateThumbnailBase64", 
+    description: "Generate a base64-encoded string from an image URL.",
     input: {
       type: "string",
-      description: "URL of the image to generate a thumbnail from",
-      example: "https://plus.unsplash.com/premium_photo-1717529138029-5b049119cfb1?q=80&w=1994&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.png"
+      description: "URL of the image to generate base64 from",
+      example: "https://example.com/image.jpg"
     },
-    output: {
-      type: "string",
-      description: "Resized image in PNG format as a buffer"
-    }
+    output: {      
+          type: "string",
+          description: "Base64-encoded image data",
+          example: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA...<base64_data>..."
+        }         
   });
 };
 
-app.post('/generateThumbnail', upload.none(), generateThumbnail);
+app.post('/generateThumbnail', generateThumbnailBase64);
 app.get('/generateThumbnail', generateThumbnailDocs);
 
 app.listen(port, () => {

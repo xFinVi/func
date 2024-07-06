@@ -2,8 +2,8 @@
   "name": "func-challenge",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
-  "scripts": {
+  "main": "app.js", 
+  "type": "module",  "scripts": {
     "start": "node app.js"
   },
   "keywords": [],
