@@ -12,35 +12,36 @@ app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-enco
 
 const generateThumbnail = async (req, res) => {
   try {
-    let requestBody = req.body;
+    let { input } = req.body;
 
-    // Check if req.body needs to be stringified (for debugging purposes)
-    if (typeof requestBody !== 'string' && !(requestBody instanceof Buffer)) {
-      // For form-data or other cases where req.body might not be a plain object or string
-      requestBody = JSON.stringify(requestBody);
-    }
-
-    console.log('Req body:', requestBody);
-
-    // Ensure we handle different content types properly
-    const input = typeof req.body === 'string' ? req.body : req.body.input;
-
+    // Ensure input is a string and handle any necessary validations
     if (typeof input !== 'string') {
       return res.status(400).json({ error: 'Invalid input format. Expected string URL.' });
     }
 
+    // Add protocol if missing (assuming HTTPS)
+    if (!input.startsWith('http://') && !input.startsWith('https://')) {
+      input = `https://${input}`; // You can adjust this based on your application's requirements
+    }
+
+    console.log('Fetching image from:', input);
+
+    // Make Axios request with the correctly formatted URL
     const { data } = await axios.get(input, { responseType: 'arraybuffer' });
 
+    // Process the image data (resize, etc.)
     const thumbnail = await sharp(Buffer.from(data))
       .resize({ width: 100, height: 100 })
       .toBuffer();
 
+    // Send the processed image as response
     res.type('jpeg').send(thumbnail);
   } catch (error) {
     console.error('Error generating thumbnail:', error);
     res.status(500).json({ error: 'Failed to generate thumbnail' });
   }
 };
+
 
 
 const generateThumbnailDocs = (req, res) => {
@@ -55,7 +56,7 @@ const generateThumbnailDocs = (req, res) => {
     output: {
       type: "string",
       description: "URL of the resized image in 100x100 thumbnail format",
-      example: "https://example.com/resized-image.jpg"
+      example: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     }
   });
 };
