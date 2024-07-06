@@ -56,7 +56,7 @@ export const generateThumbnail = async (req, res) => {
 
 export const generateThumbnailDocs = (req, res) => {
   res.json({
-    name: "generateThumbnailBase64",
+    name: "generateThumbnail",
     description: "Generate a base64-encoded string from an image URL.",
     input: {
       type: "string",
