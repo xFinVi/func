@@ -12,36 +12,46 @@ app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-enco
 
 const generateThumbnail = async (req, res) => {
   try {
-    let requestBody = req.body;
+    const input = req.body.input; // Assuming 'input' is the field name in the form-data
 
-    // Check if req.body needs to be stringified (for debugging purposes)
-    if (typeof requestBody !== 'string' && !(requestBody instanceof Buffer)) {
-      // For form-data or other cases where req.body might not be a plain object or string
-      requestBody = JSON.stringify(requestBody);
-    }
+    console.log('Received input:', input);
 
-    console.log('Req body:', requestBody);
-
-    // Ensure we handle different content types properly
-    const input = typeof req.body === 'string' ? req.body : req.body.input;
-
+    // Ensure input is a string and handle any necessary validations
     if (typeof input !== 'string') {
+      console.log('Invalid input format. Expected string URL.');
       return res.status(400).json({ error: 'Invalid input format. Expected string URL.' });
     }
 
-    const { data } = await axios.get(input, { responseType: 'arraybuffer' });
+    // Add protocol if missing (assuming HTTPS)
+    const imageUrl = input.startsWith('http') ? input : `https://${input}`;
 
-    const thumbnail = await sharp(Buffer.from(data))
+    console.log('Fetching image from:', imageUrl);
+
+    // Fetch the image data using Axios
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer'
+    });
+
+    console.log('Image fetched successfully.');
+
+    // Resize and convert image to buffer
+    const thumbnailBuffer = await sharp(Buffer.from(response.data))
       .resize({ width: 100, height: 100 })
+      .toFormat('png')
       .toBuffer();
 
-    res.type('jpeg').send(thumbnail);
+    console.log('Image resized and converted to buffer.');
+
+    // Send the image buffer as response
+    res.type('image/png').send(thumbnailBuffer);
+
+    console.log('Response sent.');
+
   } catch (error) {
     console.error('Error generating thumbnail:', error);
     res.status(500).json({ error: 'Failed to generate thumbnail' });
   }
 };
-
 
 const generateThumbnailDocs = (req, res) => {
   res.json({
@@ -55,7 +65,7 @@ const generateThumbnailDocs = (req, res) => {
     output: {
       type: "string",
       description: "URL of the resized image in 100x100 thumbnail format",
-      example: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      
     }
   });
 };
