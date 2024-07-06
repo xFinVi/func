@@ -61,11 +61,8 @@ const generateThumbnailDocs = (req, res) => {
     output: {
       type: "string",
       description: "URL of the resized image in 100x100 thumbnail format",
-<<<<<<< HEAD
-      example: "https://example.com/resized-image.jpg"
-=======
       example: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.png"
->>>>>>> ff70d66a49f28e8cbc3097d89ac09d13225490a9
+
     }
   };
 
