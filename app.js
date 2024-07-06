@@ -55,19 +55,20 @@ const generateThumbnail = async (req, res) => {
 const generateThumbnailDocs = (req, res) => {
   res.json({
     name: "generateThumbnail",
-    description: "Generate a thumbnail from an image URL (string).",
+    description: "Generate a thumbnail from an image URL.",
     input: {
       type: "string",
       description: "URL of the image to generate a thumbnail from",
-      example: "https://plus.unsplash.com/premium_photo-1717529138029-5b049119cfb1?q=80&w=1994&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      example: "https://plus.unsplash.com/premium_photo-1717529138029-5b049119cfb1"
     },
     output: {
-      type: "string",
-      description: "Resized image in PNG format as a buffer",
-      example: "<Buffer ... >" // Example of a PNG buffer, actual content can vary
+      type: "image/png", // specify MIME type if serving directly
+      description: "Resized thumbnail image in PNG format",
+      example: "https://plus.unsplash.com/premium_photo-1717529138029-5b049119cfb1.png"
     }
   });
 };
+
 
 
 app.post('/generateThumbnail', upload.none(), generateThumbnail);
