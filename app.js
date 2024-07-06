@@ -46,7 +46,7 @@ const generateThumbnail = async (req, res) => {
     // Set the appropriate headers for a PNG image
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Content-Length', thumbnailBuffer.length);
-    res.end(thumbnailBuffer);
+    res.send(thumbnailBuffer)
 
   } catch (error) {
     console.error('Error generating thumbnail:', error);
