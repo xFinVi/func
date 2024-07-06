@@ -2,6 +2,8 @@ const express = require('express');
 const axios = require('axios');
 const sharp = require('sharp');
 const multer = require('multer');
+const fs = require('fs').promises; // For file system operations
+const path = require('path');
 const upload = multer(); // For parsing multipart/form-data
 
 const app = express();
@@ -41,11 +43,18 @@ const generateThumbnail = async (req, res) => {
       return res.status(400).json({ error: 'Invalid input format. Expected string URL.' });
     }
 
-    // Call fetchAndProcessImage and send the processed image buffer as response
+    // Call fetchAndProcessImage to get the thumbnail buffer
     const thumbnailBuffer = await fetchAndProcessImage(input);
 
-   res.type('image/png').send(thumbnailBuffer);
- 
+    // Define the file path where the image will be saved
+    const imageFilePath = path.join(__dirname, 'thumbnails', 'thumbnail.png');
+
+    // Save the thumbnail buffer to the file system
+    await fs.writeFile(imageFilePath, thumbnailBuffer);
+
+    // Respond with success message or any relevant information
+    res.json({ message: 'Thumbnail generated and saved successfully', imagePath: imageFilePath });
+
   } catch (error) {
     console.error('Error generating thumbnail:', error);
     res.status(500).json({ error: 'Failed to generate thumbnail' });
@@ -69,10 +78,23 @@ const generateThumbnailDocs = (req, res) => {
   });
 };
 
-
+// POST endpoint for generating thumbnail
 app.post('/generateThumbnail', upload.none(), generateThumbnail);
+
+// GET endpoint for retrieving API documentation
 app.get('/generateThumbnail', generateThumbnailDocs);
 
+// Create 'thumbnails' directory if it doesn't exist
+const thumbnailsDir = path.join(__dirname, 'thumbnails');
+fs.mkdir(thumbnailsDir, { recursive: true })
+  .then(() => {
+    console.log(`'thumbnails' directory created or already exists.`);
+  })
+  .catch((err) => {
+    console.error('Error creating thumbnails directory:', err);
+  });
+
+// Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
