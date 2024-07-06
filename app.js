@@ -1,91 +1,79 @@
 import express from 'express';
-import sharp from 'sharp';
-import multer from 'multer';
-import https from 'https';
+import axios from 'axios';
 
-const upload = multer(); // For parsing multipart/form-data
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
 
-const fetchAndProcessImage = async (imageUrl) => {
-  return new Promise((resolve, reject) => {
-    https.get(imageUrl, { responseType: 'arraybuffer' }, async (response) => {
-      if (response.statusCode !== 200) {
-        reject(new Error(`Failed to fetch image. Status code: ${response.statusCode}`));
-        return;
-      }
-
-      const chunks = [];
-      response.on('data', (chunk) => chunks.push(chunk));
-      response.on('end', async () => {
-        const buffer = Buffer.concat(chunks);
-
-        try {
-          const thumbnailBuffer = await sharp(buffer)
-            .resize({ width: 100, height: 100 })
-            .toFormat('png')
-            .toBuffer();
-
-          resolve(thumbnailBuffer);
-        } catch (error) {
-          reject(error);
-        }
-      });
-    }).on('error', (error) => {
-      reject(error);
+const fetchAndEncodeImageBase64 = async (imageUrl) => {
+  try {
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer'
     });
-  });
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch image from ${imageUrl}. Status code: ${response.status}`);
+    }
+
+    // Convert image buffer to base64
+    const imageBuffer = Buffer.from(response.data, 'binary');
+    const base64Image = imageBuffer.toString('base64');
+
+    return base64Image;
+  } catch (error) {
+    throw new Error(`Failed to fetch and encode image: ${error.message}`);
+  }
 };
 
 export const generateThumbnail = async (req, res) => {
   try {
-    const input = req.body.input; // Assuming 'input' is the field name in the form-data
+    const { input } = req.body;
 
-    console.log('Received input:', input);
+    console.log('Received image URL:', input);
 
-    // Ensure input is a string and handle any necessary validations
-    if (typeof input !== 'string') {
+    // Ensure imageUrl is provided and handle any necessary validations
+    if (!input || typeof input !== 'string') {
       console.log('Invalid input format. Expected string URL.');
       return res.status(400).json({ error: 'Invalid input format. Expected string URL.' });
     }
 
-    // Call fetchAndProcessImage and send the processed image buffer as response
-    const output = await fetchAndProcessImage(input);
+    // Call fetchAndEncodeImageBase64 to get the base64-encoded image
+    const base64Image = await fetchAndEncodeImageBase64(input);
 
-    // Set the appropriate headers for a PNG image
-    res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Content-Length', output.length);
-
-    // Send the image data directly as the response
-    res.send(output);
+    // Send the base64-encoded image as JSON response
+    res.json({ base64Image });
 
   } catch (error) {
-    console.error('Error generating thumbnail:', error);
-    res.status(500).json({ error: 'Failed to generate thumbnail' });
+    console.error('Error generating base64 from image:', error);
+    res.status(500).json({ error: 'Failed to generate base64 from image' });
   }
 };
 
 export const generateThumbnailDocs = (req, res) => {
   res.json({
     name: "generateThumbnail",
-    description: "Generate a thumbnail from an image URL (string).",
+    description: "Generate a base64-encoded string from an image URL.",
     input: {
       type: "string",
-      description: "URL of the image to generate a thumbnail from",
+      description: "URL of the image to generate base64 from",
       example: "https://example.com/image.jpg"
     },
     output: {
-      type: "image/png",
-      description: "Resized image in PNG format as binary data",
-      example: "<Binary image data>" // Example of binary image data, actual content can vary
+      type: "object",
+      properties: {
+        base64Image: {
+          type: "string",
+          description: "Base64-encoded image data",
+          example: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA...<base64_data>..."
+        }
+      }
     }
   });
 };
 
-app.post('/generateThumbnail', upload.none(), generateThumbnail);
+app.post('/generateThumbnail', generateThumbnail);
 app.get('/generateThumbnail', generateThumbnailDocs);
 
 app.listen(port, () => {
