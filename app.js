@@ -61,7 +61,7 @@ export const generateThumbnailDocs = (req, res) => {
     input: {
       type: "string",
       description: "URL of the image to generate base64 from",
-      example: "https://images.unsplash.com/photo-1720040960409-e70d6d45bb40?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      example: "https://images.unsplash.com/photo-1720040960409-e70d6d45bb40?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.png"
     },
     output: {
       type: "string",
