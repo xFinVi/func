@@ -27,7 +27,7 @@ const fetchAndEncodeImageBase64 = async (imageUrl) => {
   }
 };
 
-export const generateThumbnail = async (req, res) => {
+export const generateThumbnailBase64 = async (req, res) => {
   try {
     const { input } = req.body;
 
@@ -53,7 +53,7 @@ export const generateThumbnail = async (req, res) => {
 
 export const generateThumbnailDocs = (req, res) => {
   res.json({
-    name: "generateThumbnail",
+    name: "generateThumbnailBase64", 
     description: "Generate a base64-encoded string from an image URL.",
     input: {
       type: "string",
@@ -73,7 +73,7 @@ export const generateThumbnailDocs = (req, res) => {
   });
 };
 
-app.post('/generateThumbnail', generateThumbnail);
+app.post('/generateThumbnail', generateThumbnailBase64);
 app.get('/generateThumbnail', generateThumbnailDocs);
 
 app.listen(port, () => {
