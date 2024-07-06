@@ -1,8 +1,8 @@
 const express = require('express');
 const sharp = require('sharp');
 const axios = require('axios');
-const multer
-
+const multer = require('multer');
+const upload = multer();
 const app = express();
 const port = process.env.PORT || 3000;
 
