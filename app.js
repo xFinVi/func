@@ -55,7 +55,7 @@ const generateThumbnail = async (req, res) => {
 const generateThumbnailDocs = (req, res) => {
   res.json({
     name: "generateThumbnail",
-    description: "Generate a thumbnail from an image URL",
+    description: "Generate a thumbnail from an image URL (string).",
     input: {
       type: "string",
       description: "URL of the image to generate a thumbnail from",
