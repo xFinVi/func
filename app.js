@@ -46,7 +46,7 @@ export const generateThumbnail = async (req, res) => {
     const base64Image = await fetchAndEncodeImageBase64(input);
 
     // Send the base64-encoded image as JSON response
-    res.send({ output: base64Image });
+    res.json({ output: JSON.stringify(base64Image) });
 
   } catch (error) {
     console.error('Error generating base64 from image:', error);
@@ -56,17 +56,17 @@ export const generateThumbnail = async (req, res) => {
 
 export const generateThumbnailDocs = (req, res) => {
   res.json({
-    name: "generateThumbnail",
+    name: "generateThumbnailBase64",
     description: "Generate a base64-encoded string from an image URL.",
     input: {
       type: "string",
       description: "URL of the image to generate base64 from",
-      example: "https://images.unsplash.com/photo-1720040960409-e70d6d45bb40?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.png"
+      example: "https://example.com/image.jpg"
     },
     output: {
       type: "string",
       description: "Base64-encoded image data",
-      example: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA.."
+      example: "\"/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA...<base64_data>...\""
     }
   });
 };
