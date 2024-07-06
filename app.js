@@ -1,9 +1,9 @@
 const express = require('express');
-const axios = require('axios');
+
 const sharp = require('sharp');
 const multer = require('multer');
 const upload = multer(); // For parsing multipart/form-data
-
+const https = require('https');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -11,22 +11,33 @@ app.use(express.json()); // Middleware to parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
 
 const fetchAndProcessImage = async (imageUrl) => {
-  try {
-    const response = await axios.get(imageUrl, {
-      responseType: 'arraybuffer' // Ensure the response is treated as binary data
+  return new Promise((resolve, reject) => {
+    https.get(imageUrl, { responseType: 'arraybuffer' }, async (response) => {
+      if (response.statusCode !== 200) {
+        reject(new Error(`Failed to fetch image. Status code: ${response.statusCode}`));
+        return;
+      }
+
+      const chunks = [];
+      response.on('data', (chunk) => chunks.push(chunk));
+      response.on('end', async () => {
+        const buffer = Buffer.concat(chunks);
+
+        try {
+          const thumbnailBuffer = await sharp(buffer)
+            .resize({ width: 100, height: 100 })
+            .toFormat('png')
+            .toBuffer();
+
+          resolve(thumbnailBuffer);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }).on('error', (error) => {
+      reject(error);
     });
-
-    // Process the image using sharp
-    const thumbnailBuffer = await sharp(Buffer.from(response.data))
-      .resize({ width: 100, height: 100 })
-      .toFormat('png')
-      .toBuffer();
-
-    return thumbnailBuffer;
-  } catch (error) {
-    console.error('Error fetching or processing image:', error);
-    throw error;
-  }
+  });
 };
 const generateThumbnail = async (req, res) => {
   try {
@@ -67,7 +78,7 @@ const generateThumbnailDocs = (req, res) => {
     output: {
       type: "string",
       description: "Resized image in PNG format as a buffer",
-      example: "<Buffer ... >" // Example of a PNG buffer, actual content can vary
+      example: "https://plus.unsplash.com/premium_photo-1717529138029-5b049119cfb1?q=80&w=1994&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.png" // Example of a PNG buffer, actual content can vary
     }
   });
 };
