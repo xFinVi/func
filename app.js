@@ -60,16 +60,11 @@ export const generateThumbnailDocs = (req, res) => {
       description: "URL of the image to generate base64 from",
       example: "https://example.com/image.jpg"
     },
-    output: {
-      type: "object",
-      properties: {
-        base64Image: {
+    output: {      
           type: "string",
           description: "Base64-encoded image data",
           example: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA...<base64_data>..."
-        }
-      }
-    }
+        }         
   });
 };
 
