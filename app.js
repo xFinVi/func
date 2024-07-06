@@ -1,18 +1,17 @@
 const express = require('express');
-const axios = require('axios');
 const sharp = require('sharp');
-const multer = require('multer');
-const upload = multer(); // For parsing multipart/form-data
+const axios = require('axios');
+const multer
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.json()); // Middleware to parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const generateThumbnail = async (req, res) => {
   try {
-    let { input } = req.body;
+    const { input } = req.body;
 
     // Ensure input is a string and handle any necessary validations
     if (typeof input !== 'string') {
@@ -20,29 +19,31 @@ const generateThumbnail = async (req, res) => {
     }
 
     // Add protocol if missing (assuming HTTPS)
-    if (!input.startsWith('http://') && !input.startsWith('https://')) {
-      input = `https://${input}`; // You can adjust this based on your application's requirements
-    }
+    const imageUrl = input.startsWith('http') ? input : `https://${input}`;
 
-    console.log('Fetching image from:', input);
+    console.log('Fetching image from:', imageUrl);
 
-    // Make Axios request with the correctly formatted URL
-    const { data } = await axios.get(input, { responseType: 'arraybuffer' });
+    // Fetch the image data using Axios
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer'
+    });
 
-    // Process the image data (resize, etc.)
-    const thumbnail = await sharp(Buffer.from(data))
+    // Resize and convert image to base64 encoded PNG
+    const thumbnailBuffer = await sharp(Buffer.from(response.data))
       .resize({ width: 100, height: 100 })
+      .toFormat('png')
       .toBuffer();
 
-    // Send the processed image as response
-    res.type('jpeg').send(thumbnail);
+    // Convert buffer to base64 string
+    const base64Image = thumbnailBuffer.toString('base64');
+
+    // Send the base64 encoded image as response
+    res.send(base64Image);
   } catch (error) {
     console.error('Error generating thumbnail:', error);
     res.status(500).json({ error: 'Failed to generate thumbnail' });
   }
 };
-
-
 
 const generateThumbnailDocs = (req, res) => {
   res.json({
@@ -50,25 +51,16 @@ const generateThumbnailDocs = (req, res) => {
     description: "Generate a thumbnail from an image URL",
     input: {
       type: "string",
-      description: "URL of the image to generate a thumbnail from",
-      example: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      description: "URL of the image to generate thumbnail from"
     },
     output: {
       type: "string",
-      description: "URL of the resized image in 100x100 thumbnail format",
-      example: "https://images.unsplash.com/photo-1716847214612-e2c2f3771d41?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      description: "Base64-encoded thumbnail image"
     }
   });
 };
 
-const enforceJsonMiddleware = (req, res, next) => {
-  if (!req.is('application/json') && !req.is('application/x-www-form-urlencoded') && !req.is('multipart/form-data')) {
-    return res.status(400).json({ error: 'Invalid content type. Expected application/json, application/x-www-form-urlencoded, or multipart/form-data.' });
-  }
-  next();
-};
-
-app.post('/generateThumbnail', enforceJsonMiddleware, upload.none(), generateThumbnail);
+app.post('/generateThumbnail', express.json(), generateThumbnail);
 app.get('/generateThumbnail', generateThumbnailDocs);
 
 app.listen(port, () => {
