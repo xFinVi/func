@@ -53,11 +53,14 @@ export const generateThumbnail = async (req, res) => {
     }
 
     // Call fetchAndProcessImage and send the processed image buffer as response
-    const thumbnailBuffer = await fetchAndProcessImage(input);
+    const output = await fetchAndProcessImage(input);
 
     // Set the appropriate headers for a PNG image
-  
-    res.json({ output: thumbnailBuffer });
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Length', output.length);
+
+    // Send the image data directly as the response
+    res.send(output);
 
   } catch (error) {
     console.error('Error generating thumbnail:', error);
@@ -72,12 +75,12 @@ export const generateThumbnailDocs = (req, res) => {
     input: {
       type: "string",
       description: "URL of the image to generate a thumbnail from",
-      example: "https://plus.unsplash.com/premium_photo-1717529138029-5b049119cfb1?q=80&w=1994&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      example: "https://example.com/image.jpg"
     },
     output: {
-      type: "string",
-      description: "Resized image in PNG format as a buffer",
-      example: "<Buffer ... >" // Example of a PNG buffer, actual content can vary
+      type: "image/png",
+      description: "Resized image in PNG format as binary data",
+      example: "<Binary image data>" // Example of binary image data, actual content can vary
     }
   });
 };
