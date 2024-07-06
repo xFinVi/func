@@ -1,8 +1,11 @@
 import express from 'express';
 import axios from 'axios';
+import multer from 'multer';
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+const upload = multer(); // For parsing multipart/form-data
 
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
@@ -53,22 +56,22 @@ export const generateThumbnail = async (req, res) => {
 
 export const generateThumbnailDocs = (req, res) => {
   res.json({
-    name: "generateThumbnailBase64", 
+    name: "generateThumbnailBase64",
     description: "Generate a base64-encoded string from an image URL.",
     input: {
       type: "string",
       description: "URL of the image to generate base64 from",
       example: "https://example.com/image.jpg"
     },
-    output: {      
-          type: "string",
-          description: "Base64-encoded image data",
-          example: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA...<base64_data>..."
-        }         
+    output: {
+      type: "string",
+      description: "Base64-encoded image data",
+      example: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA...<base64_data>..."
+    }
   });
 };
 
-app.post('/generateThumbnail', generateThumbnail);
+app.post('/generateThumbnail', upload.none(), generateThumbnail);
 app.get('/generateThumbnail', generateThumbnailDocs);
 
 app.listen(port, () => {
