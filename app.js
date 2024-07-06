@@ -60,12 +60,7 @@ const getDocs = (req, res) => {
           type: "string",
           description: "MIME type of the resized image",
           example: "image/jpeg"
-        },
-        data: {
-          type: "string",
-          description: "Binary data of the resized image",
-          example: "<binary image data>"
-        }
+        }       
       }
     }
   });
