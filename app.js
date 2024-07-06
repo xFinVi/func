@@ -63,10 +63,12 @@ const generateThumbnailDocs = (req, res) => {
     },
     output: {
       type: "string",
-      description: "Resized image in PNG format as a buffer"
+      description: "Resized image in PNG format as a buffer",
+      example: "<Buffer ... >" // Example of a PNG buffer, actual content can vary
     }
   });
 };
+
 
 app.post('/generateThumbnail', upload.none(), generateThumbnail);
 app.get('/generateThumbnail', generateThumbnailDocs);
