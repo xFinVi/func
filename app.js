@@ -43,7 +43,7 @@ export const generateThumbnailBase64 = async (req, res) => {
     const base64Image = await fetchAndEncodeImageBase64(input);
 
     // Send the base64-encoded image as JSON response
-    res.json({ base64Image });
+    res.json({ output: base64Image });
 
   } catch (error) {
     console.error('Error generating base64 from image:', error);
