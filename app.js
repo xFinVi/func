@@ -2,8 +2,6 @@ const express = require('express');
 const axios = require('axios');
 const sharp = require('sharp');
 const multer = require('multer');
-const fs = require('fs').promises; // For file system operations
-const path = require('path');
 const upload = multer(); // For parsing multipart/form-data
 
 const app = express();
@@ -42,17 +40,13 @@ const generateThumbnail = async (req, res) => {
       return res.status(400).json({ error: 'Invalid input format. Expected string URL.' });
     }
 
-    // Call fetchAndProcessImage to get the thumbnail buffer
+    // Call fetchAndProcessImage and send the processed image buffer as response
     const thumbnailBuffer = await fetchAndProcessImage(input);
 
-    // Define the file path where the image will be saved
-    const imageFilePath = path.join(__dirname, 'thumbnails', 'thumbnail.png');
-
-    // Save the thumbnail buffer to the file system
-    await fs.writeFile(imageFilePath, thumbnailBuffer);
-
-    // Respond with success message or any relevant information
-    res.json({ message: 'Thumbnail generated and saved successfully', imagePath: imageFilePath });
+    // Set the appropriate headers for a PNG image
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Length', thumbnailBuffer.length);
+    res.end(thumbnailBuffer);
 
   } catch (error) {
     console.error('Error generating thumbnail:', error);
@@ -73,28 +67,15 @@ const generateThumbnailDocs = (req, res) => {
     output: {
       type: "string",
       description: "Resized image in PNG format as a buffer",
-      example: "https://plus.unsplash.com/premium_photo-1717529138029-5b049119cfb1?q=80&w=1994&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.png" // Example of a PNG buffer, actual content can vary
+      example: "<Buffer ... >" // Example of a PNG buffer, actual content can vary
     }
   });
 };
 
-// POST endpoint for generating thumbnail
-app.post('/generateThumbnail', upload.none(), generateThumbnail);
 
-// GET endpoint for retrieving API documentation
+app.post('/generateThumbnail', upload.none(), generateThumbnail);
 app.get('/generateThumbnail', generateThumbnailDocs);
 
-// Create 'thumbnails' directory if it doesn't exist
-const thumbnailsDir = path.join(__dirname, 'thumbnails');
-fs.mkdir(thumbnailsDir, { recursive: true })
-  .then(() => {
-    console.log(`'thumbnails' directory created or already exists.`);
-  })
-  .catch((err) => {
-    console.error('Error creating thumbnails directory:', err);
-  });
-
-// Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
